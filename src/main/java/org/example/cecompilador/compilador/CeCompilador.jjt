@@ -1,0 +1,256 @@
+options
+{
+  static = true;
+}
+
+PARSER_BEGIN(CeCompilador)
+package compilador;
+
+import recovery.*;
+
+public class CeCompilador
+{
+  public static void main(String args []) throws ParseException
+  {
+    CeCompilador parser = new CeCompilador(System.in);
+    while (true)
+    {
+      System.out.println("Lendo da entrada padrao...");
+      System.out.print("Insira uma expressao comoa \"mein {  inti x ; }\" :");
+      try
+      {
+        //parser.main();
+        SimpleNode n = CeCompilador.main();
+        n.dump(" ");
+      }
+      catch (Exception e)
+      {
+        System.out.println("Ih rapaz...");
+        System.out.println(e.getMessage());
+        parser.ReInit(System.in);
+      }
+      catch (Error e)
+      {
+        System.out.println("Deu ruim.");
+        System.out.println(e.getMessage());
+        break;
+      }
+    }
+  }
+
+static public String im(int x)
+  {
+    int k;
+	String s;
+    s = tokenImage[x];
+    k = s.lastIndexOf("\"");
+    try {
+      s = s.substring(1,k);
+    }
+   catch (StringIndexOutOfBoundsException e)
+	   {}
+   return s;
+  }
+	
+  static Token lastError = null;
+  static boolean eof;    // variável que indica se EOF foi alcançado
+	
+  // o método abaixo consome tokens até alcançar um que pertença ao conjunto
+  // de sincronização
+  static void consumeUntil(RecoverySet g,
+	                 ParseException e,
+	                 String met) throws ParseEOFException,
+	                                    ParseException
+  {
+	Token tok;
+	System.out.println();
+	System.out.println("* " + met + " *");
+	System.out.println("     Conjunto de sincronização: " + g);
+		
+	if (g == null) throw e; // se o conjunto é null, propaga a exceção
+	
+	tok = getToken(1); // pega token corrente
+	while ( ! eof )	{ // se não chegou ao fim do arquivo
+	  if ( g.contains(tok.kind)) {//achou um token no conjunto
+	    System.out.println("     Encontrado token de sincronização: " + 
+	                       im(tok.kind));
+	    break;
+	  }
+	  System.out.println("     Ignorando o token: " + im(tok.kind));
+	  getNextToken();     // pega próximo token       
+      tok = getToken(1);
+	  if (tok.kind == EOF && ! g.contains(EOF) ) // fim da entrada?   
+	      eof = true;
+	}
+    if ( tok != lastError)  {
+	  System.out.println(e.getMessage());
+	  lastError = tok;
+	   
+	}
+	if ( eof )
+	  throw new ParseEOFException("Encontrei EOF onde não deveria.");
+	}
+  
+}
+
+PARSER_END(CeCompilador)
+
+SKIP :
+{
+  " "
+| "\r"
+| "\t"
+| "\n"
+}
+
+TOKEN : /* OPERATORS */
+{
+  < INICIAPROG : "mein" >
+| < ABREBLOCO : "{" >
+| < FECHABLOCO : "}" >
+| < FIMINSTRUCAO: ";" >
+| < TIPOINT : "inti" >
+| < TIPOFLOAT : "flouti" >
+| < TIPOBOL : "buleam" >
+}
+
+TOKEN : /* CONDITIONALS */
+{
+  < IF : "ifi" >
+| < ABREPAR : "(" >
+| < FECHAPAR : ")" >
+| < OPREL : "==" | "!=" | "<" | ">" | "<=" | ">=" >
+| < OPBOOL : "&&" | "||" >
+}
+
+TOKEN : /* ASSIGNMENT */
+{
+  < ASSIGN : "=" >
+| < COMMA : "," >
+}
+
+TOKEN : /* LOOP */
+{
+  < WHILE : "uaio" >
+| < DO : "du" >
+| < DOWHILE : "uaiu" >
+}
+
+TOKEN : /* ARITHMETIC OPERATORS */
+{
+  < OPAD : "+" | "-" >
+| < OPMULT : "*" | "/" >
+}
+
+TOKEN :
+{
+  < CONST_INT : (["0"-"9"])+ >
+| < CONST_FLOAT : (["0"-"9"])+ "." (["0"-"9"])+ >
+| < #DIGITO : [ "0"-"9" ] >
+| < ID : ["a"-"z"](["a"-"z"] | < DIGITO >)* >
+}
+
+SimpleNode main() :
+{RecoverySet follow = First.main;}
+{
+
+	try {
+		< INICIAPROG > < ABREBLOCO > (instrucao())* < FECHABLOCO >  
+ 	} catch(ParseException e) {
+		consumeUntil(follow, e, "main");
+ 	}
+
+ 	{
+ 	  return jjtThis;
+ 	}
+  
+}
+
+void instrucao() :
+{}
+{
+    (declaracaoVariavel() | atribuicao() | expressao() < FIMINSTRUCAO >) | blocoInstrucoes() | estruturaCondicional() | estruturaRepeticao()
+}
+
+void blocoInstrucoes() :
+{}
+{
+    < ABREBLOCO > (instrucao())* < FECHABLOCO >
+}
+
+void declaracaoVariavel() :
+{RecoverySet follow = First.declaraVariavel;}
+{
+	try {
+		declaraTipo() < ID > (< COMMA > < ID >)* ( < ASSIGN > expressao() )? < FIMINSTRUCAO >	
+ 	} catch(ParseException e) {
+		consumeUntil(follow, e, "declaracao de variavel");
+ 	}
+  
+}
+
+void declaraTipo() :
+{}
+{
+    ( < TIPOINT > | < TIPOFLOAT > | < TIPOBOL > )
+}
+
+void atribuicao() :
+{}
+{
+    < ID > < ASSIGN > expressao() < FIMINSTRUCAO >
+}
+
+void estruturaCondicional() :
+{}
+{
+    < IF > < ABREPAR > expressao() < FECHAPAR > blocoInstrucoes()
+}
+
+void estruturaRepeticao() :
+{}
+{
+    (estruturaWhile() | estruturaDoWhile())
+}
+
+void estruturaWhile() :
+{}
+{
+    < WHILE > < ABREPAR > expressao() < FECHAPAR > blocoInstrucoes()
+}
+
+void estruturaDoWhile() :
+{}
+{
+    < DO > blocoInstrucoes() < DOWHILE > < ABREPAR > expressao() < FECHAPAR > < FIMINSTRUCAO >
+}
+
+void expressao() :
+{}
+{
+    expressaoRelacional() ( < OPBOOL > expressaoRelacional() )*
+}
+
+void expressaoRelacional() :
+{}
+{
+    expressaoAritmetica() ( < OPREL > expressaoAritmetica() )?
+}
+
+void expressaoAritmetica() :
+{}
+{
+    termo() ( < OPAD > termo() )*
+}
+
+void termo() :
+{}
+{
+    fator() ( < OPMULT > fator() )*
+}
+
+void fator() :
+{}
+{
+    < ID > | < CONST_INT > | < CONST_FLOAT > | < ABREPAR > expressao() < FECHAPAR >
+}
