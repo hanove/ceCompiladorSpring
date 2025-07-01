@@ -203,14 +203,18 @@ SimpleNode main() :
 
 void instrucao() :
 {/*@bgen(jjtree) instrucao */
-  SimpleNode jjtn000 = new SimpleNode(JJTINSTRUCAO);
-  boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);
-/*@egen*/}
+ SimpleNode jjtn000 = new SimpleNode(JJTINSTRUCAO);
+ boolean jjtc000 = true;
+ jjtree.openNodeScope(jjtn000);
+/*@egen*/RecoverySet follow = First.instrucao;}
 {/*@bgen(jjtree) instrucao */
     try {
 /*@egen*/
-    (declaracaoVariavel() | atribuicao() | expressao() < FIMINSTRUCAO >) | blocoInstrucoes() | estruturaCondicional() | estruturaRepeticao()/*@bgen(jjtree)*/
+    try {
+        (declaracaoVariavel() | atribuicao() | expressao() < FIMINSTRUCAO >) | blocoInstrucoes() | estruturaCondicional() | estruturaRepeticao()
+    } catch(ParseException e) {
+        consumeUntil(follow, e, "instrucao");
+    }/*@bgen(jjtree)*/
     } catch (Throwable jjte000) {
       if (jjtc000) {
         jjtree.clearNodeScope(jjtn000);
@@ -235,14 +239,18 @@ void instrucao() :
 
 void blocoInstrucoes() :
 {/*@bgen(jjtree) blocoInstrucoes */
-  SimpleNode jjtn000 = new SimpleNode(JJTBLOCOINSTRUCOES);
-  boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);
-/*@egen*/}
+ SimpleNode jjtn000 = new SimpleNode(JJTBLOCOINSTRUCOES);
+ boolean jjtc000 = true;
+ jjtree.openNodeScope(jjtn000);
+/*@egen*/RecoverySet follow = First.blocoInstrucao;}
 {/*@bgen(jjtree) blocoInstrucoes */
     try {
 /*@egen*/
-    < ABREBLOCO > (instrucao())* < FECHABLOCO >/*@bgen(jjtree)*/
+    try {
+        < ABREBLOCO > (instrucao())* < FECHABLOCO >
+    } catch(ParseException e) {
+        consumeUntil(follow, e, "bloco de instrucoes");
+    }/*@bgen(jjtree)*/
     } catch (Throwable jjte000) {
       if (jjtc000) {
         jjtree.clearNodeScope(jjtn000);
@@ -275,7 +283,7 @@ void declaracaoVariavel() :
         try {
 /*@egen*/
 	try {
-		declaraTipo() < ID > (< COMMA > < ID >)* ( < ASSIGN > expressao() )? < FIMINSTRUCAO >	
+		declaraTipo() < ID > (< COMMA > < ID >)* ( < ASSIGN > expressao() )? < FIMINSTRUCAO >
  	} catch(ParseException e) {
 		consumeUntil(follow, e, "declaracao de variavel");
  	}/*@bgen(jjtree)*/
@@ -299,7 +307,7 @@ void declaracaoVariavel() :
           }
         }
 /*@egen*/
-  
+
 }
 
 void declaraTipo() :
@@ -322,14 +330,18 @@ void declaraTipo() :
 
 void atribuicao() :
 {/*@bgen(jjtree) atribuicao */
-  SimpleNode jjtn000 = new SimpleNode(JJTATRIBUICAO);
-  boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);
-/*@egen*/}
+ SimpleNode jjtn000 = new SimpleNode(JJTATRIBUICAO);
+ boolean jjtc000 = true;
+ jjtree.openNodeScope(jjtn000);
+/*@egen*/RecoverySet follow = First.atribuicao;}
 {/*@bgen(jjtree) atribuicao */
     try {
 /*@egen*/
-    < ID > < ASSIGN > expressao() < FIMINSTRUCAO >/*@bgen(jjtree)*/
+    try {
+        < ID > < ASSIGN > expressao() < FIMINSTRUCAO >
+    } catch(ParseException e) {
+        consumeUntil(follow, e, "atribuicao");
+    }/*@bgen(jjtree)*/
     } catch (Throwable jjte000) {
       if (jjtc000) {
         jjtree.clearNodeScope(jjtn000);
@@ -354,14 +366,18 @@ void atribuicao() :
 
 void estruturaCondicional() :
 {/*@bgen(jjtree) estruturaCondicional */
-  SimpleNode jjtn000 = new SimpleNode(JJTESTRUTURACONDICIONAL);
-  boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);
-/*@egen*/}
+ SimpleNode jjtn000 = new SimpleNode(JJTESTRUTURACONDICIONAL);
+ boolean jjtc000 = true;
+ jjtree.openNodeScope(jjtn000);
+/*@egen*/RecoverySet follow = First.estruturaCondicional;}
 {/*@bgen(jjtree) estruturaCondicional */
     try {
 /*@egen*/
-    < IF > < ABREPAR > expressao() < FECHAPAR > blocoInstrucoes()/*@bgen(jjtree)*/
+    try {
+        < IF > < ABREPAR > expressao() < FECHAPAR > blocoInstrucoes()
+    } catch(ParseException e) {
+        consumeUntil(follow, e, "estrutura condicional");
+    }/*@bgen(jjtree)*/
     } catch (Throwable jjte000) {
       if (jjtc000) {
         jjtree.clearNodeScope(jjtn000);
@@ -386,14 +402,18 @@ void estruturaCondicional() :
 
 void estruturaRepeticao() :
 {/*@bgen(jjtree) estruturaRepeticao */
-  SimpleNode jjtn000 = new SimpleNode(JJTESTRUTURAREPETICAO);
-  boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);
-/*@egen*/}
+ SimpleNode jjtn000 = new SimpleNode(JJTESTRUTURAREPETICAO);
+ boolean jjtc000 = true;
+ jjtree.openNodeScope(jjtn000);
+/*@egen*/RecoverySet follow = First.estruturaRepeticao;}
 {/*@bgen(jjtree) estruturaRepeticao */
     try {
 /*@egen*/
-    (estruturaWhile() | estruturaDoWhile())/*@bgen(jjtree)*/
+    try {
+        (estruturaWhile() | estruturaDoWhile())
+    } catch(ParseException e) {
+        consumeUntil(follow, e, "estrutura de repeticao");
+    }/*@bgen(jjtree)*/
     } catch (Throwable jjte000) {
       if (jjtc000) {
         jjtree.clearNodeScope(jjtn000);
@@ -416,16 +436,21 @@ void estruturaRepeticao() :
 /*@egen*/
 }
 
+
 void estruturaWhile() :
 {/*@bgen(jjtree) estruturaWhile */
-  SimpleNode jjtn000 = new SimpleNode(JJTESTRUTURAWHILE);
-  boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);
-/*@egen*/}
+ SimpleNode jjtn000 = new SimpleNode(JJTESTRUTURAWHILE);
+ boolean jjtc000 = true;
+ jjtree.openNodeScope(jjtn000);
+/*@egen*/RecoverySet follow = First.estruturaWhile;}
 {/*@bgen(jjtree) estruturaWhile */
     try {
 /*@egen*/
-    < WHILE > < ABREPAR > expressao() < FECHAPAR > blocoInstrucoes()/*@bgen(jjtree)*/
+    try {
+        < WHILE > < ABREPAR > expressao() < FECHAPAR > blocoInstrucoes()
+    } catch(ParseException e) {
+        consumeUntil(follow, e, "estrutura while");
+    }/*@bgen(jjtree)*/
     } catch (Throwable jjte000) {
       if (jjtc000) {
         jjtree.clearNodeScope(jjtn000);
@@ -450,14 +475,18 @@ void estruturaWhile() :
 
 void estruturaDoWhile() :
 {/*@bgen(jjtree) estruturaDoWhile */
-  SimpleNode jjtn000 = new SimpleNode(JJTESTRUTURADOWHILE);
-  boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);
-/*@egen*/}
+ SimpleNode jjtn000 = new SimpleNode(JJTESTRUTURADOWHILE);
+ boolean jjtc000 = true;
+ jjtree.openNodeScope(jjtn000);
+/*@egen*/RecoverySet follow = First.estruturaDoWhile;}
 {/*@bgen(jjtree) estruturaDoWhile */
     try {
 /*@egen*/
-    < DO > blocoInstrucoes() < DOWHILE > < ABREPAR > expressao() < FECHAPAR > < FIMINSTRUCAO >/*@bgen(jjtree)*/
+    try {
+        < DO > blocoInstrucoes() < DOWHILE > < ABREPAR > expressao() < FECHAPAR > < FIMINSTRUCAO >
+    } catch(ParseException e) {
+        consumeUntil(follow, e, "estrutura do-while");
+    }/*@bgen(jjtree)*/
     } catch (Throwable jjte000) {
       if (jjtc000) {
         jjtree.clearNodeScope(jjtn000);
@@ -482,14 +511,18 @@ void estruturaDoWhile() :
 
 void expressao() :
 {/*@bgen(jjtree) expressao */
-  SimpleNode jjtn000 = new SimpleNode(JJTEXPRESSAO);
-  boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);
-/*@egen*/}
+ SimpleNode jjtn000 = new SimpleNode(JJTEXPRESSAO);
+ boolean jjtc000 = true;
+ jjtree.openNodeScope(jjtn000);
+/*@egen*/RecoverySet follow = First.expressao;}
 {/*@bgen(jjtree) expressao */
     try {
 /*@egen*/
-    expressaoRelacional() ( < OPBOOL > expressaoRelacional() )*/*@bgen(jjtree)*/
+    try {
+        expressaoRelacional() ( < OPBOOL > expressaoRelacional() )*
+    } catch(ParseException e) {
+        consumeUntil(follow, e, "expressao");
+    }/*@bgen(jjtree)*/
     } catch (Throwable jjte000) {
       if (jjtc000) {
         jjtree.clearNodeScope(jjtn000);
@@ -514,14 +547,18 @@ void expressao() :
 
 void expressaoRelacional() :
 {/*@bgen(jjtree) expressaoRelacional */
-  SimpleNode jjtn000 = new SimpleNode(JJTEXPRESSAORELACIONAL);
-  boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);
-/*@egen*/}
+ SimpleNode jjtn000 = new SimpleNode(JJTEXPRESSAORELACIONAL);
+ boolean jjtc000 = true;
+ jjtree.openNodeScope(jjtn000);
+/*@egen*/RecoverySet follow = First.expressaoRelacional;}
 {/*@bgen(jjtree) expressaoRelacional */
     try {
 /*@egen*/
-    expressaoAritmetica() ( < OPREL > expressaoAritmetica() )?/*@bgen(jjtree)*/
+    try {
+        expressaoAritmetica() ( < OPREL > expressaoAritmetica() )?
+    } catch(ParseException e) {
+        consumeUntil(follow, e, "expressao relacional");
+    }/*@bgen(jjtree)*/
     } catch (Throwable jjte000) {
       if (jjtc000) {
         jjtree.clearNodeScope(jjtn000);
@@ -544,16 +581,21 @@ void expressaoRelacional() :
 /*@egen*/
 }
 
+
 void expressaoAritmetica() :
 {/*@bgen(jjtree) expressaoAritmetica */
-  SimpleNode jjtn000 = new SimpleNode(JJTEXPRESSAOARITMETICA);
-  boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);
-/*@egen*/}
+ SimpleNode jjtn000 = new SimpleNode(JJTEXPRESSAOARITMETICA);
+ boolean jjtc000 = true;
+ jjtree.openNodeScope(jjtn000);
+/*@egen*/RecoverySet follow = First.expressaoAritmetica;}
 {/*@bgen(jjtree) expressaoAritmetica */
     try {
 /*@egen*/
-    termo() ( < OPAD > termo() )*/*@bgen(jjtree)*/
+    try {
+        termo() ( < OPAD > termo() )*
+    } catch(ParseException e) {
+        consumeUntil(follow, e, "expressao aritmetica");
+    }/*@bgen(jjtree)*/
     } catch (Throwable jjte000) {
       if (jjtc000) {
         jjtree.clearNodeScope(jjtn000);
@@ -578,14 +620,18 @@ void expressaoAritmetica() :
 
 void termo() :
 {/*@bgen(jjtree) termo */
-  SimpleNode jjtn000 = new SimpleNode(JJTTERMO);
-  boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);
-/*@egen*/}
+ SimpleNode jjtn000 = new SimpleNode(JJTTERMO);
+ boolean jjtc000 = true;
+ jjtree.openNodeScope(jjtn000);
+/*@egen*/RecoverySet follow = First.termo;}
 {/*@bgen(jjtree) termo */
     try {
 /*@egen*/
-    fator() ( < OPMULT > fator() )*/*@bgen(jjtree)*/
+    try {
+        fator() ( < OPMULT > fator() )*
+    } catch(ParseException e) {
+        consumeUntil(follow, e, "termo");
+    }/*@bgen(jjtree)*/
     } catch (Throwable jjte000) {
       if (jjtc000) {
         jjtree.clearNodeScope(jjtn000);
@@ -610,14 +656,18 @@ void termo() :
 
 void fator() :
 {/*@bgen(jjtree) fator */
-  SimpleNode jjtn000 = new SimpleNode(JJTFATOR);
-  boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);
-/*@egen*/}
+ SimpleNode jjtn000 = new SimpleNode(JJTFATOR);
+ boolean jjtc000 = true;
+ jjtree.openNodeScope(jjtn000);
+/*@egen*/RecoverySet follow = First.fator;}
 {/*@bgen(jjtree) fator */
     try {
 /*@egen*/
-    < ID > | < CONST_INT > | < CONST_FLOAT > | < ABREPAR > expressao() < FECHAPAR >/*@bgen(jjtree)*/
+    try {
+        < ID > | < CONST_INT > | < CONST_FLOAT > | < ABREPAR > expressao() < FECHAPAR >
+    } catch(ParseException e) {
+        consumeUntil(follow, e, "fator");
+    }/*@bgen(jjtree)*/
     } catch (Throwable jjte000) {
       if (jjtc000) {
         jjtree.clearNodeScope(jjtn000);

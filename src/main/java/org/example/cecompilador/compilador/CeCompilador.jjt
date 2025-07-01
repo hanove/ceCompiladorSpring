@@ -16,7 +16,7 @@ public class CeCompilador
     while (true)
     {
       System.out.println("Lendo da entrada padrao...");
-      System.out.print("Insira uma expressao comoa \"mein {  inti x ; }\" :");
+      System.out.print("Insira uma expressao como \"mein {  inti x ; }\" :");
       try
       {
         //parser.main();
@@ -51,10 +51,10 @@ static public String im(int x)
 	   {}
    return s;
   }
-	
+
   static Token lastError = null;
   static boolean eof;    // variável que indica se EOF foi alcançado
-	
+
   // o método abaixo consome tokens até alcançar um que pertença ao conjunto
   // de sincronização
   static void consumeUntil(RecoverySet g,
@@ -66,31 +66,31 @@ static public String im(int x)
 	System.out.println();
 	System.out.println("* " + met + " *");
 	System.out.println("     Conjunto de sincronização: " + g);
-		
+
 	if (g == null) throw e; // se o conjunto é null, propaga a exceção
-	
+
 	tok = getToken(1); // pega token corrente
 	while ( ! eof )	{ // se não chegou ao fim do arquivo
 	  if ( g.contains(tok.kind)) {//achou um token no conjunto
-	    System.out.println("     Encontrado token de sincronização: " + 
+	    System.out.println("     Encontrado token de sincronização: " +
 	                       im(tok.kind));
 	    break;
 	  }
 	  System.out.println("     Ignorando o token: " + im(tok.kind));
-	  getNextToken();     // pega próximo token       
+	  getNextToken();     // pega próximo token
       tok = getToken(1);
-	  if (tok.kind == EOF && ! g.contains(EOF) ) // fim da entrada?   
+	  if (tok.kind == EOF && ! g.contains(EOF) ) // fim da entrada?
 	      eof = true;
 	}
     if ( tok != lastError)  {
 	  System.out.println(e.getMessage());
 	  lastError = tok;
-	   
+
 	}
 	if ( eof )
 	  throw new ParseEOFException("Encontrei EOF onde não deveria.");
 	}
-  
+
 }
 
 PARSER_END(CeCompilador)
@@ -155,7 +155,7 @@ SimpleNode main() :
 {
 
 	try {
-		< INICIAPROG > < ABREBLOCO > (instrucao())* < FECHABLOCO >  
+		< INICIAPROG > < ABREBLOCO > (instrucao())* < FECHABLOCO >
  	} catch(ParseException e) {
 		consumeUntil(follow, e, "main");
  	}
@@ -163,30 +163,38 @@ SimpleNode main() :
  	{
  	  return jjtThis;
  	}
-  
+
 }
 
 void instrucao() :
-{}
+{RecoverySet follow = First.instrucao;}
 {
-    (declaracaoVariavel() | atribuicao() | expressao() < FIMINSTRUCAO >) | blocoInstrucoes() | estruturaCondicional() | estruturaRepeticao()
+    try {
+        (declaracaoVariavel() | atribuicao() | expressao() < FIMINSTRUCAO >) | blocoInstrucoes() | estruturaCondicional() | estruturaRepeticao()
+    } catch(ParseException e) {
+        consumeUntil(follow, e, "instrucao");
+    }
 }
 
 void blocoInstrucoes() :
-{}
+{RecoverySet follow = First.blocoInstrucao;}
 {
-    < ABREBLOCO > (instrucao())* < FECHABLOCO >
+    try {
+        < ABREBLOCO > (instrucao())* < FECHABLOCO >
+    } catch(ParseException e) {
+        consumeUntil(follow, e, "bloco de instrucoes");
+    }
 }
 
 void declaracaoVariavel() :
 {RecoverySet follow = First.declaraVariavel;}
 {
 	try {
-		declaraTipo() < ID > (< COMMA > < ID >)* ( < ASSIGN > expressao() )? < FIMINSTRUCAO >	
+		declaraTipo() < ID > (< COMMA > < ID >)* ( < ASSIGN > expressao() )? < FIMINSTRUCAO >
  	} catch(ParseException e) {
 		consumeUntil(follow, e, "declaracao de variavel");
  	}
-  
+
 }
 
 void declaraTipo() :
@@ -196,61 +204,103 @@ void declaraTipo() :
 }
 
 void atribuicao() :
-{}
+{RecoverySet follow = First.atribuicao;}
 {
-    < ID > < ASSIGN > expressao() < FIMINSTRUCAO >
+    try {
+        < ID > < ASSIGN > expressao() < FIMINSTRUCAO >
+    } catch(ParseException e) {
+        consumeUntil(follow, e, "atribuicao");
+    }
 }
 
 void estruturaCondicional() :
-{}
+{RecoverySet follow = First.estruturaCondicional;}
 {
-    < IF > < ABREPAR > expressao() < FECHAPAR > blocoInstrucoes()
+    try {
+        < IF > < ABREPAR > expressao() < FECHAPAR > blocoInstrucoes()
+    } catch(ParseException e) {
+        consumeUntil(follow, e, "estrutura condicional");
+    }
 }
 
 void estruturaRepeticao() :
-{}
+{RecoverySet follow = First.estruturaRepeticao;}
 {
-    (estruturaWhile() | estruturaDoWhile())
+    try {
+        (estruturaWhile() | estruturaDoWhile())
+    } catch(ParseException e) {
+        consumeUntil(follow, e, "estrutura de repeticao");
+    }
 }
 
+
 void estruturaWhile() :
-{}
+{RecoverySet follow = First.estruturaWhile;}
 {
-    < WHILE > < ABREPAR > expressao() < FECHAPAR > blocoInstrucoes()
+    try {
+        < WHILE > < ABREPAR > expressao() < FECHAPAR > blocoInstrucoes()
+    } catch(ParseException e) {
+        consumeUntil(follow, e, "estrutura while");
+    }
 }
 
 void estruturaDoWhile() :
-{}
+{RecoverySet follow = First.estruturaDoWhile;}
 {
-    < DO > blocoInstrucoes() < DOWHILE > < ABREPAR > expressao() < FECHAPAR > < FIMINSTRUCAO >
+    try {
+        < DO > blocoInstrucoes() < DOWHILE > < ABREPAR > expressao() < FECHAPAR > < FIMINSTRUCAO >
+    } catch(ParseException e) {
+        consumeUntil(follow, e, "estrutura do-while");
+    }
 }
 
 void expressao() :
-{}
+{RecoverySet follow = First.expressao;}
 {
-    expressaoRelacional() ( < OPBOOL > expressaoRelacional() )*
+    try {
+        expressaoRelacional() ( < OPBOOL > expressaoRelacional() )*
+    } catch(ParseException e) {
+        consumeUntil(follow, e, "expressao");
+    }
 }
 
 void expressaoRelacional() :
-{}
+{RecoverySet follow = First.expressaoRelacional;}
 {
-    expressaoAritmetica() ( < OPREL > expressaoAritmetica() )?
+    try {
+        expressaoAritmetica() ( < OPREL > expressaoAritmetica() )?
+    } catch(ParseException e) {
+        consumeUntil(follow, e, "expressao relacional");
+    }
 }
 
+
 void expressaoAritmetica() :
-{}
+{RecoverySet follow = First.expressaoAritmetica;}
 {
-    termo() ( < OPAD > termo() )*
+    try {
+        termo() ( < OPAD > termo() )*
+    } catch(ParseException e) {
+        consumeUntil(follow, e, "expressao aritmetica");
+    }
 }
 
 void termo() :
-{}
+{RecoverySet follow = First.termo;}
 {
-    fator() ( < OPMULT > fator() )*
+    try {
+        fator() ( < OPMULT > fator() )*
+    } catch(ParseException e) {
+        consumeUntil(follow, e, "termo");
+    }
 }
 
 void fator() :
-{}
+{RecoverySet follow = First.fator;}
 {
-    < ID > | < CONST_INT > | < CONST_FLOAT > | < ABREPAR > expressao() < FECHAPAR >
+    try {
+        < ID > | < CONST_INT > | < CONST_FLOAT > | < ABREPAR > expressao() < FECHAPAR >
+    } catch(ParseException e) {
+        consumeUntil(follow, e, "fator");
+    }
 }
